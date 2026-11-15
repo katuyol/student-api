@@ -1,0 +1,22 @@
+services:
+  migrate:                      # service 1: one-off job, JSON -> SQLite
+    build:
+      context: .
+      dockerfile: docker/migrate.Dockerfile
+    volumes:
+      - db_data:/data
+
+  api:                          # service 2: FastAPI app
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/data
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db_data:
